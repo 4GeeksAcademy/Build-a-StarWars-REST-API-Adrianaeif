@@ -36,14 +36,39 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-@app.route('/user', methods=['GET'])
-def handle_hello():
+# @app.route('/user', methods=['GET'])
+# def handle_hello():
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
+#     response_body = {
+#         "msg": "Hello, this is your GET /user response "
+#     }
 
-    return jsonify(response_body), 200
+#     return jsonify(response_body), 200
+
+# CREATE 
+@app.route('/user', methods=['POST'])
+def add_user():
+    body = request.json
+
+    name = body.get('name', None)
+    last_name = body.get('last_name', None)
+    email = body.get('email',None)
+    password = body.get('password', None)
+
+    if name == None or last_name == None or email == None or password == None:
+        return jsonify({"mg" : "Incompleto"}), 400
+
+        try:
+
+            new_user = User(name=name, last_name=last_name, email=email, password=password)
+            db.session.add(new_user) 
+            db.session.commit()
+            
+            return jsonify({"msg" : "Creado"}), 201
+
+        except:
+            return jsonify ({"Error" : "Incompleto"}), 500
+    
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
