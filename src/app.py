@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User, Character, Planet
 #from models import Person
 
 app = Flask(__name__)
@@ -45,7 +45,17 @@ def sitemap():
 
 #     return jsonify(response_body), 200
 
-# CREATE 
+#GET Users
+@app.route('/user', methods=['GET'])
+def info_user():
+
+    user_list = User.query.all()
+    response = [person.serialize() for person in user_list]
+
+    return jsonify(response), 200
+
+
+# CREATE User
 @app.route('/user', methods=['POST'])
 def add_user():
     body = request.json
@@ -58,17 +68,58 @@ def add_user():
     if name == None or last_name == None or email == None or password == None:
         return jsonify({"mg" : "Incompleto"}), 400
 
-        try:
+    try:
 
-            new_user = User(name=name, last_name=last_name, email=email, password=password)
-            db.session.add(new_user) 
-            db.session.commit()
-            
-            return jsonify({"msg" : "Creado"}), 201
+        new_user = User(name=name, last_name=last_name, email=email, password=password)
+        db.session.add(new_user) 
+        db.session.commit()
+        
+        return jsonify({"msg" : "Creado"}), 201
 
-        except:
-            return jsonify ({"Error" : "Incompleto"}), 500
+    except:
+        return jsonify ({"Error" : "Incompleto"}), 500
     
+# GET PEOPLE / CHARACTER
+@app.route('/character', methods=['GET'])
+def info_character():
+
+    character_list = Character.query.all()
+    response = [character.serialize() for character in character_list]
+
+    return jsonify(response), 200
+    
+
+#GET ID CHARACTER
+
+@app.route('/character/<int:id>', methods=['GET'])
+def id_character(id):
+
+    character = Character.query.get(id)
+    if character == None:
+        return jsonify({"msg" : "No se encontro"}), 400
+
+    return jsonify(character.serialize()), 200
+
+
+# GET PLANET
+@app.route('/planets', methods=['GET'])
+def info_planet():
+
+    planet_list = Planet.query.all()
+    response = [planet.serialize() for planet in planet_list]
+
+    return jsonify(response), 200
+
+#GET ID PLANET
+
+@app.route('/planets/<int:id>', methods=['GET'])
+def id_planet(id):
+
+    planet = Planet.query.get(id)
+    if planet == None:
+        return jsonify({"msg" : "No se encontro"}), 400
+
+    return jsonify(planet.serialize()), 200
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
