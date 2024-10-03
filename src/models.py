@@ -83,20 +83,27 @@ class Planet(db.Model):
 class Favorite(db.Model):
     __tablename__ = 'favorite'
     id = db.Column(db.Integer, primary_key=True)
-    user = db.Column(db.Integer, db.ForeignKey("user.id"))
-    character = db.Column(db.Integer, db.ForeignKey("character.id"))
-    planet = db.Column(db.Integer, db.ForeignKey("planet.id"))
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+    user = db.relationship(User)
+    character_id = db.Column(db.Integer, db.ForeignKey("character.id"))
+    character = db.relationship(Character)
+    planet_id  = db.Column(db.Integer, db.ForeignKey("planet.id"))
+    planet = db.relationship(Planet)
 
-    def __init__(self, id, user, character, planet):
-        self.id = id
-        self.user = user
-        self.character = character
-        self.planet = planet
+
+    def __init__(self, id, user_id, character_id, planet_id ):
+         self.id = id
+         self.user_id = user_id
+         self.character_id = character_id
+         self.planet_id = planet_id 
+
+    def __repr__(self):
+        return '<Favorite %r>' % self.id
 
     def serialize(self):
         return {
             "id" : self.id,
-            "user": self.user,
-            "character": self.character,
-            "planet": self.planet,
+            "user_id": self.user_id,
+            "character_id": self.character_id,
+            "planet_id": self.planet_id,
         }

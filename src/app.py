@@ -8,7 +8,7 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User, Character, Planet
+from models import db, User, Character, Planet, Favorite
 #from models import Person
 
 app = Flask(__name__)
@@ -120,6 +120,77 @@ def id_planet(id):
         return jsonify({"msg" : "No se encontro"}), 400
 
     return jsonify(planet.serialize()), 200
+
+#GET FAVORITE [/users/favorites]
+@app.route('/users/<int:id>/favorites', methods=['GET'])
+def user_favorite(id):
+
+    favorites = Favorite.query.filter_by(user_id = id).all()
+
+    favorites_serialize = [favorite.serialize() for favorite in favorites]
+
+    return jsonify(favorites_serialize), 200
+
+# POST Planet - User
+@app.route('/user/<int:id>/favorite/planet/<int:planet_id>', methods = ['POST'])
+def add_planet(id, planet_id):
+
+    try:
+
+        new_planet_favorite = Favorite(user_id = id, planet_id = planet_id)
+        db.session.add(new_planet_favorite) 
+        db.session.commit()
+        
+        return jsonify({"msg" : "success"}), 201
+
+    except:
+        return jsonify ({"Error" : "Error"}), 500
+
+# POST Character - User
+@app.route('/user/<int:id>/favorite/character/<int:character_id>', methods = ['POST'])
+def add_character(id, character_id):
+
+    try:
+
+        new_character_favorite = Favorite(user_id = id, character_id = character_id)
+        db.session.add(new_character_favorite ) 
+        db.session.commit()
+        
+        return jsonify({"msg" : "success"}), 201
+
+    except:
+        return jsonify ({"Error" : "Error"}), 500
+    
+# DELETE Planet - User
+@app.route('/user/<int:id>/favorite/planet/<int:planet_id>', methods = ['DELETE'])
+def remove_planet(id, planet_id):
+
+    searched_planet = Favorite.query.filter_by(user_id = id, planet_id = planet_id).one_or_none()
+
+    if searched_planet != None:
+        db.session.add(searched_planet) 
+        db.session.commit()
+        return jsonify(searched_planet.serialize()), 200
+
+    else:
+         return jsonify ({"Error" : "Error"}), 500
+    
+
+# DELETE Character - User
+@app.route('/user/<int:id>/favorite/character/<int:character_id>', methods = ['DELETE'])
+def remove_character(id, character_id):
+
+    searched_character = Favorite.query.filter_by(user_id = id, character_id = character_id).one_or_none()
+
+    if searched_character != None:
+        db.session.add(searched_character) 
+        db.session.commit()
+        return jsonify(searched_character.serialize()), 200
+
+    else:
+         return jsonify ({"Error" : "Error"}), 500
+
+
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
